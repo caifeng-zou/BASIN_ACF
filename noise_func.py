@@ -123,16 +123,13 @@ def data_processing(data_src, data_rec, freqmin=0.1, freqmax=1, whiten_window=0.
     g_src = smooth(cp.abs(fft_src), WSZ)
     g_rec = smooth(cp.abs(fft_rec), WSZ)
     whitened = fft_multiplied / (g_src * g_rec)
-    if freqmin is not None:
-        whitened[freqs<freqmin] = 0
-    if freqmax is not None:
-        whitened[freqs>freqmax] = 0
     prelim_corr = cp.fft.irfft(whitened, axis=-1)  
+    prelim_corr = bandpass(cp.asnumpy(prelim_corr), freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
     truncate = shift * 2 + 1
-    final_corr = cp.roll(prelim_corr, fast_length//2, axis=-1)[fast_length//2-truncate//2:fast_length//2-truncate//2+truncate]
+    final_corr = np.roll(prelim_corr, fast_length//2, axis=-1)[fast_length//2-truncate//2:fast_length//2-truncate//2+truncate]
     final_corr = final_corr[shift:] + final_corr[:shift+1][::-1]
-    final_corr = final_corr / cp.abs(final_corr).max()
-    return cp.asnumpy(final_corr)
+    final_corr = final_corr / np.abs(final_corr).max()
+    return final_corr
 
 def sort_datetime(date_strings):
     # Convert date strings to datetime objects
