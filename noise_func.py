@@ -6,6 +6,7 @@ import cupy as cp
 
 from obspy.signal.filter import bandpass
 from datetime import datetime
+from obspy.signal.invsim import cosine_taper
 
 tau_len = 15  # correlation shifting length - investigation depth
 sampling_rate = 50  # resampling rate of data
@@ -98,10 +99,12 @@ def data_processing(data_src, data_rec, freqmin=0.1, freqmax=1, whiten_window=0.
     '''
     data_...: (nt,), numpy array
     '''
+    signal_length = len(data_src)
+    tap1 = cosine_taper(signal_length, p=0.2)
     data_src = data_src - data_src.mean()
     data_rec = data_rec - data_rec.mean()
-    data_src = bandpass(data_src, freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
-    data_rec = bandpass(data_rec, freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
+    data_src = bandpass(data_src*tap1, freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
+    data_rec = bandpass(data_rec*tap1, freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
     data_src = temporal_normalization(data_src, dt, agcwindow=5)
     data_rec = temporal_normalization(data_rec, dt, agcwindow=5)
     
@@ -110,11 +113,10 @@ def data_processing(data_src, data_rec, freqmin=0.1, freqmax=1, whiten_window=0.
     # standardize to make correlation lie between -1 and 1
     data_src = (data_src - data_src.mean()) / (data_src.std() * len(data_src))
     data_rec = (data_rec - data_rec.mean()) / data_rec.std() 
-    signal_length = len(data_src)
     x_cor_sig_length = signal_length * 2 + 1
     fast_length = nextpow2(x_cor_sig_length)
-    fft_src = cp.fft.rfft(data_src, fast_length, axis=-1)
-    fft_rec = cp.fft.rfft(data_rec, fast_length, axis=-1)
+    fft_src = cp.fft.rfft(data_src*cp.array(tap1), fast_length, axis=-1)
+    fft_rec = cp.fft.rfft(data_rec*cp.array(tap1), fast_length, axis=-1)
     fft_multiplied = cp.conj(fft_src) * fft_rec
     freqs = cp.arange(fast_length // 2 + 1) * fs / (fast_length - 1)
     df = freqs[1] - freqs[0]
@@ -124,7 +126,7 @@ def data_processing(data_src, data_rec, freqmin=0.1, freqmax=1, whiten_window=0.
     g_rec = smooth(cp.abs(fft_rec), WSZ)
     whitened = fft_multiplied / (g_src * g_rec)
     prelim_corr = cp.fft.irfft(whitened, axis=-1)  
-    prelim_corr = bandpass(cp.asnumpy(prelim_corr), freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
+    prelim_corr = bandpass(cp.asnumpy(prelim_corr)*cosine_taper(len(prelim_corr), p=0.2), freqmin=freqmin, freqmax=freqmax, df=fs, zerophase=True)
     truncate = shift * 2 + 1
     final_corr = np.roll(prelim_corr, fast_length//2, axis=-1)[fast_length//2-truncate//2:fast_length//2-truncate//2+truncate]
     final_corr = final_corr[shift:] + final_corr[:shift+1][::-1]
