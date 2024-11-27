@@ -1,7 +1,8 @@
 # BASIN_ACF
 
 ## Introduction
-This repository provides code for the paper [Imaging the Northern Los Angeles Basins with Autocorrelations](https://arxiv.org/pdf/2405.20635).
+This repository provides code for the paper [Imaging the Northern Los Angeles Basins with Autocorrelations](
+https://doi.org/10.1785/0220240140).
 
 ## File Description
 - **noise_acf_TT_SB1.ipynb**: Workflow for ambient noise autocorrelation, taking Line SB1 as an example
@@ -24,7 +25,7 @@ environment.yml
 ## Contact
 We welcome any comments or questions regarding this work. If you find it helpful, please cite:
 ```
-Zou, C., & Clayton, R. W. (2024). Imaging the Northern Los Angeles Basins with Autocorrelations. arXiv preprint arXiv:2405.20635.
+Caifeng Zou, Robert W. Clayton; Imaging the Northern Los Angeles Basins with Autocorrelations. Seismological Research Letters 2024; doi: https://doi.org/10.1785/0220240140
 ```
 
 Caifeng Zou\
