@@ -25,7 +25,7 @@ environment.yml
 ## Contact
 We welcome any comments or questions regarding this work. If you find it helpful, please cite:
 ```
-Caifeng Zou, Robert W. Clayton; Imaging the Northern Los Angeles Basins with Autocorrelations. Seismological Research Letters 2024; doi: https://doi.org/10.1785/0220240140
+Zou, C., & Clayton, R. W. (2025). Imaging the Northern Los Angeles basins with autocorrelations. Seismological Research Letters, 96(3), 1791-1801.
 ```
 
 Caifeng Zou\
