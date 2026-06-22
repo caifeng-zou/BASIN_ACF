@@ -6,7 +6,6 @@ import cupy as cp
 
 from obspy.signal.filter import bandpass
 from datetime import datetime
-from obspy.signal.invsim import cosine_taper
 
 tau_len = 15  # correlation shifting length - investigation depth
 sampling_rate = 50  # resampling rate of data
